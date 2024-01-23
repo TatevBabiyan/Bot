@@ -1,0 +1,77 @@
+from flask import Flask
+from flask import request
+from flask import Response
+import requests
+import json
+
+TOKEN = '<5849446215:AAG4SqGCkKfQ4hjiHU_CbTnKg98uNgATlbY>'
+app = Flask(__name__)
+
+def parse_message(message):
+    print('message--->',message)
+    chat_id = message['message']['chat']['id']
+    txt = message['message']['text']
+    print('chat_id--->', chat_id)
+    print('txt--->',txt)
+    return chat_id,txt
+
+def tel_send_message(chat_id,text):
+    url = f'https://api.telegram.org/bot5849446215:AAG4SqGCkKfQ4hjiHU_CbTnKg98uNgATlbY/sendMessage'
+    payload = {
+        'chat_id':chat_id,
+        'text':text,
+    }
+
+    r = requests.post(url,json=payload)
+    return r
+
+def tel_send_video(chat_id):
+    url = f'https://api.telegram.org/bot5849446215:AAG4SqGCkKfQ4hjiHU_CbTnKg98uNgATlbY/sendVideo'
+    payload = {
+        'chat_id':chat_id,
+        'video':'https://www.appsloveworld.com/wp-content/uploads/2018/10/640.mp4',
+    }
+
+    r = requests.post(url,json=payload)
+    return r
+
+def tel_send_poll(chat_id):
+    url = f'https://api.telegram.org/bot5849446215:AAG4SqGCkKfQ4hjiHU_CbTnKg98uNgATlbY/sendPoll'
+    payload = {
+        'chat_id':chat_id,
+        'question':'In which direction does the sun rise?',
+        'options':json.dumps(['North','West','South','East']),
+        'is_anonymous':False,
+        'type':'quiz',
+        'correct_option_id':3,
+    }
+
+    r = requests.post(url,json=payload)
+    return r
+
+@app.route('/', methods=['GET','POST'])
+def index():
+    if request.method == 'POST':
+        msg = request.get_json()
+        
+        chat_id,txt = parse_message(msg)
+        if txt == 'Hi':
+            tel_send_message(chat_id, 'Hi Darling!')
+            tel_send_video(chat_id)
+        elif txt == 'video':
+            tel_send_video(chat_id)
+        elif txt == 'poll':
+            tel_send_poll(chat_id)
+        else:
+            tel_send_message(chat_id, "I've created this Bot special for you my Meri, but it is still in process, I'll add more functions for you!")
+        
+
+        return Response('ok',status=200)
+    
+    else:
+        return 'Hello Darling!'
+
+if __name__ == '__main__':
+    app.run(threaded=True)
+
+
